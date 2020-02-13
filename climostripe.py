@@ -40,6 +40,30 @@ def make_request(endpoint, payload=None):
     )
 
 
+def station_lookup(fips_id):
+    """
+    This function grabs the station metadata for the given region entered by the user.
+    It can be helpful when identifying which station to use and what the stationid is.
+
+    Parameters:
+        - fipsid: A string containing the FIPS ID (ex. UK)
+
+    Returns:
+        - df: A pandas dataframe containing the elevation, start date, end date, latitude, longitude,
+              name of the station, data coverage (0 to 1), stationid, and elevation units
+    """
+
+    station_id = make_request('stations',
+                              {
+                                  'datasetid': 'GHCND',  # Global Historical Climatology Network - Daily (GHCND) dataset
+                                  'locationid': 'FIPS:'+fips_id,  # Location using FIPS ID
+                                  'datacategoryid': 'TEMP',  # Check for temperature data
+                                  'limit': 1000  # Return maximum allowed
+                              }).json()["results"]
+
+    return pd.Dataframe(station_id)
+
+
 def getdata(stationid, startyear, endyear):
     """
     This function grabs min and max daily temperature data for a chosen station from NOAA GHCND climate dataset.
