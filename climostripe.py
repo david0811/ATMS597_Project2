@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from matplotlib.collections import PatchCollection
 from matplotlib.colors import ListedColormap
+import matplotlib.dates as mdates
+
+plt.rcParams.update({'font.size': 24})
 
 # Create a function for requesting the data
 """
@@ -61,7 +64,7 @@ def station_lookup(fips_id):
                                   'limit': 1000  # Return maximum allowed
                               }).json()["results"]
 
-    return pd.Dataframe(station_id)
+    return pd.DataFrame(station_id)
 
 
 def getdata(stationid, startyear, endyear):
@@ -96,7 +99,7 @@ def getdata(stationid, startyear, endyear):
                                 {
                                     'datasetid': 'GHCND',
                                     # Global Historical Climatology Network - Daily (GHCND) dataset
-                                    'datatypeid': 'TMAX',  # Max Temp
+                                    'datatypeid': ['TMAX', 'TMIN'], # Max Temp
                                     'stationid': stationid,  # Station ID
                                     'startdate': currentstart,
                                     'enddate': currentend,
@@ -108,21 +111,6 @@ def getdata(stationid, startyear, endyear):
             # We extend the list instead of appending to avoid getting a nested list
             results.extend(response.json()['results'])
 
-        response = make_request('data',
-                                {
-                                    'datasetid': 'GHCND',
-                                    # Global Historical Climatology Network - Daily (GHCND) dataset
-                                    'datatypeid': 'TMIN',  # Min Temp
-                                    'stationid': stationid,  # Station ID
-                                    'startdate': currentstart,
-                                    'enddate': currentend,
-                                    'units': 'metric',  # Temperature units are degrees C
-                                    'limit': 1000  # Return maximum allowed
-                                })
-
-        if response.ok:
-            # We extend the list instead of appending to avoid getting a nested list
-            results.extend(response.json()['results'])
 
         # Update the current date to avoid an infinite loop
         start += 1
@@ -138,6 +126,13 @@ def getdata(stationid, startyear, endyear):
 
     # Re-sample at chosen frequency and return dataframe
     return df[:-1]
+
+
+def read_csv(name):
+    df = pd.read_csv(name)
+    df["date"] = df.apply(lambda x: datetime.datetime.strptime(x["date"], "%Y-%m-%d"), axis = 1) # Convert dates to datetime format
+    df.set_index(["date"], inplace = True)
+    return df
 
 
 def plot(df, startdate, enddate, timefreq, plot_line=True, savefig=False, figtitle='climate_stripes.png'):
@@ -173,8 +168,6 @@ def plot(df, startdate, enddate, timefreq, plot_line=True, savefig=False, figtit
     # Resample data
     df = df[startdate: enddate].resample(samplefreq).mean()
 
-    # Get mean over reference period
-    reference = df["TAvg"].mean()
     cmap = ListedColormap([
         '#08306b', '#08519c', '#2171b5', '#4292c6',
         '#6baed6', '#9ecae1', '#c6dbef', '#deebf7',
@@ -213,11 +206,21 @@ def plot(df, startdate, enddate, timefreq, plot_line=True, savefig=False, figtit
     # Set limits
     ax.set_ylim(ymin, ymax)
     ax.set_xlim(xmin, xmax)
-    ax.xaxis.set_ticks(np.arange(xmin, xmax + 1, 1))
+
+    if timefreq == 'yearly':
+        ax.xaxis.set_ticks(np.arange(xmin, xmax + 1, 5))
+
+    elif timefreq == 'monthly':
+        ax.xaxis.set_ticks(np.arange(xmin, xmax + 1, 1))
+
+    elif timefreq == 'weekly':
+        ax.xaxis.set_ticks(np.arange(xmin, xmax + 1, 1))
+
     ax.yaxis.set_ticks(np.arange(ymin, ymax, 1))
 
     # Final touches
-    plt.xticks(rotation=45)
+    plt.xticks(rotation=45, fontsize=24)
+    plt.yticks(fontsize=24)
     ax.set_xlabel('Year', fontsize=24)
     ax.set_ylabel(u'Temperature [$^\degree$C]', fontsize=24)
     plt.title('Warming Stripes', fontsize=40, pad=20)
