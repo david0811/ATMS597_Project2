@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from matplotlib.collections import PatchCollection
 from matplotlib.colors import ListedColormap
-import matplotlib.dates as mdates
 
+# Set fontsize
 plt.rcParams.update({'font.size': 24})
 
 # Create a function for requesting the data
