@@ -219,6 +219,9 @@ def plot(df, startdate, enddate, timefreq, plot_line=True, savefig=False, figtit
     ax.yaxis.set_ticks(np.arange(ymin, ymax, 1))
 
     # Final touches
+    cbar = plt.colorbar(col)
+    cbar.ax.tick_params(labelsize=24)
+    cbar.set_label('Temperature [$^\degree$C]', fontsize=24)
     plt.xticks(rotation=45, fontsize=24)
     plt.yticks(fontsize=24)
     ax.set_xlabel('Year', fontsize=24)
