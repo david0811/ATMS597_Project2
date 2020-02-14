@@ -37,7 +37,7 @@ def make_request(endpoint, payload=None):
     return requests.get(
         f'https://www.ncdc.noaa.gov/cdo-web/api/v2/{endpoint}',
         headers={
-            'token': 'DOENrJHGTEFUiebNMWZLniFJXUGTiVxr'
+            'token': 'INSERT TOKEN HERE'
         },
         params=payload
     )
