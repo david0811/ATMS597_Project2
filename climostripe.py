@@ -69,8 +69,8 @@ def station_lookup(fips_id):
 
 def getdata(stationid, startyear, endyear):
     """
-    This function grabs min and max daily temperature data for a chosen station from NOAA GHCND climate dataset.
-    It then calculates the average temperature over a chosen date range.
+    This function grabs min and max daily temperature data for a chosen station from NOAA GHCND
+    climate dataset. It then calculates the average temperature over a chosen date range.
 
     Parameters:
         - stationid:  A string of the GHCND station identifier (ex. GHCND:UK000000000)
@@ -99,7 +99,7 @@ def getdata(stationid, startyear, endyear):
                                 {
                                     'datasetid': 'GHCND',
                                     # Global Historical Climatology Network - Daily (GHCND) dataset
-                                    'datatypeid': ['TMAX', 'TMIN'], # Max Temp
+                                    'datatypeid': ['TMAX', 'TMIN'],  # Max Temp
                                     'stationid': stationid,  # Station ID
                                     'startdate': currentstart,
                                     'enddate': currentend,
@@ -110,7 +110,6 @@ def getdata(stationid, startyear, endyear):
         if response.ok:
             # We extend the list instead of appending to avoid getting a nested list
             results.extend(response.json()['results'])
-
 
         # Update the current date to avoid an infinite loop
         start += 1
@@ -130,8 +129,9 @@ def getdata(stationid, startyear, endyear):
 
 def read_csv(name):
     df = pd.read_csv(name)
-    df["date"] = df.apply(lambda x: datetime.datetime.strptime(x["date"], "%Y-%m-%d"), axis = 1) # Convert dates to datetime format
-    df.set_index(["date"], inplace = True)
+    # Convert dates to datetime format
+    df["date"] = df.apply(lambda x: datetime.datetime.strptime(x["date"], "%Y-%m-%d"), axis=1)
+    df.set_index(["date"], inplace=True)
     return df
 
 
@@ -144,15 +144,15 @@ def plot(df, startdate, enddate, timefreq, plot_line=True, savefig=False, figtit
     Parameters:
         - startdate:  String of starting date, e.g. '1955-01-01'
         - enddate:    String of end date, e.g. '1970-12-31'
-        - timefreq: String of desired time frequency. For example, user can input 'yearly', 'monthly', or 'weekly'.
-                    A string using the pandas DateOffset alias can also be used. For documentation,
+        - timefreq: String of desired time frequency. For example, user can input 'yearly', 'monthly', or
+                    'weekly'. A string using the pandas DateOffset alias can also be used. For documentation,
                     see https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html
 
     Returns:
         Plot of climate stripes and time series of mean temperatures (TAvg)
     """
 
-    # Convert input time frequency to pandas dataoffset alias values
+    # Convert input time frequency to pandas data offset alias format
     if timefreq == 'yearly':
         samplefreq = 'AS'
 
@@ -221,11 +221,11 @@ def plot(df, startdate, enddate, timefreq, plot_line=True, savefig=False, figtit
     # Final touches
     cbar = plt.colorbar(col)
     cbar.ax.tick_params(labelsize=24)
-    cbar.set_label('Temperature [$^\degree$C]', fontsize=24)
+    cbar.set_label('Temperature [degrees C]', fontsize=24)
     plt.xticks(rotation=45, fontsize=24)
     plt.yticks(fontsize=24)
     ax.set_xlabel('Year', fontsize=24)
-    ax.set_ylabel(u'Temperature [$^\degree$C]', fontsize=24)
+    ax.set_ylabel(u'Temperature [degree C]', fontsize=24)
     plt.title('Warming Stripes', fontsize=40, pad=20)
 
     # Save the figure if specified
